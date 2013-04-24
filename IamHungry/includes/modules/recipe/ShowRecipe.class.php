@@ -10,17 +10,18 @@ class ShowRecipe implements IModule
 	
     function __construct()
     {
-    	$this->recipe = new Recipe($id_recipe);
+    	//
     }
     
-    function preProcess($construct)
+    function preProcess($id_recipe)
     {
-    	//
+    	$this->recipe = new Recipe($id_recipe);
     }
 
     function display()
     {
-    	
+    	echo 'Recipe: '. $this->recipe->name .'<br />';
+		var_dump($this->recipe->getFullContentInArray());
     }
 
 }

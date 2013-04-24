@@ -71,9 +71,7 @@ class SHOPUTT
 												'Mon panier Shop\'utt',
 												'1'
 											); ");
-		
-		//TODO envoyer mail validation compte
-		
+				
 		return $id_user;	// l'id du dernier insert dans la db
 	}
 	

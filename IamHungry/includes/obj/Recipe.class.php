@@ -23,7 +23,7 @@ class Recipe extends sqlRow
 						'instructions'		=> $this->instructions,
 						'nb_servings'		=> $this->nb_servings,
 						'preparation_time'	=> $this->preparation_time,
-						'category'			=> $this->getCategory(),
+						'category'			=> 1, //$this->getCategory(),
 						'ingredients'		=> $this->getIngredients()					
 					);
 	}
@@ -34,11 +34,14 @@ class Recipe extends sqlRow
 	 */
 	public function getIngredients()
 	{
-		$q_Ingredients = DB::getInstance()->query("SELECT id_ingredient, quantity FROM as_recipe_ingredient WHERE id_entity={$this->id} and type='recipe' {$maxReq} ;");
-		while($qId = $q_Ingredients->fetch_object())
-			$ingredientsList[] = array(new Ingredient($qId->id_ingredient), $qId->quantity);
+		$q_Ingredients = DB::getInstance()->query("SELECT id_ingredient, quantity FROM list WHERE id_entity={$this->id} and list_type='recipe' ;");
+
+		while($qId = $q_Ingredients->fetch_object()) {
+			$ing = new Ingredient($qId->id_ingredient);
+			$ingredientsList[] = array($ing->name, $qId->quantity);
+		}
 			
-		return $ingredientsList;
+		return ($ingredientsList != null) ? $ingredientsList : null;
 	}
 	
     public function getCategory()
