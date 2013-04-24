@@ -23,17 +23,27 @@ class Recipe extends sqlRow
 						'instructions'		=> $this->instructions,
 						'nb_servings'		=> $this->nb_servings,
 						'preparation_time'	=> $this->preparation_time,
-						'category'			=> $this->getCategory()					
+						'category'			=> $this->getCategory(),
+						'ingredients'		=> $this->getIngredients()					
 					);
 	}
 	
-    /**
-     * Function getType
-     * Return the type of the recipe
-     */
+	/**
+	 * Function getIngredients()
+	 * Get a list of all ingredients and associated quantity of the recipe
+	 */
+	public function getIngredients()
+	{
+		$q_Ingredients = DB::getInstance()->query("SELECT id_ingredient, quantity FROM as_recipe_ingredient WHERE id_entity={$this->id} and type='recipe' {$maxReq} ;");
+		while($qId = $q_Ingredients->fetch_object())
+			$ingredientsList[] = array(new Ingredient($qId->id_ingredient), $qId->quantity);
+			
+		return $ingredientsList;
+	}
+	
     public function getCategory()
     {
-        //return new Category($this->???);
+    	return sql_query("select name from recipe-ingredient_category where id= {$this->id} ;");
     }
 	
 	

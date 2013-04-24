@@ -3,6 +3,7 @@
 // /!\ DO NOT COMMIT !!
 
 // Site specifics
+define('DEBUG_MODE'				, 1);
 define('DEFAULT_TITLE'			, 'Iam Hungry');
 define('DEFAULT_DESCRIPTION'	, 'Iam Hungry! Cool story dude');
 define('URL_BASE_SITE'			, 'http://localhost/IamHungry');

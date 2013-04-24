@@ -169,7 +169,7 @@ class IAMHUNGRY
 		$q = DB::getInstance()->query("SELECT id FROM ingredient ORDER BY name {$maxReq} ;");
 		$j = 0;
 		while($ingredient = $q->fetch_object()) {
-			$i    			= new Ingredient($ingredient->id_product_list);
+			$i    			= new Ingredient($ingredient->id);
 			$ingredients[]	= $i;
 		}
 		return $ingredients;
@@ -207,6 +207,7 @@ class IAMHUNGRY
 				}
 			}
 		}
+		
 		return $this->getModule($moduleName);
 	}
 
@@ -217,13 +218,8 @@ class IAMHUNGRY
 	private function getModuleDirectories()
 	{
 		return Array(
-					'global',
-					'account',
-					'home',
-					'product',
-					'product_type',
-					'all_products',
-					'product_list'
+					'recipe',
+					'test'
 				);
 	}
 	

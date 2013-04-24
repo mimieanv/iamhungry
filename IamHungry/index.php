@@ -8,6 +8,6 @@
 	else
 		$page = 'homepage';
 		
-	include_once('pages/'.$page.'.php');
+	include_once('/pages/'.$page.'.php');
 	
 ?>

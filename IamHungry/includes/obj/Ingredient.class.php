@@ -5,7 +5,7 @@
  * Writed to deal with IamHungry's meal plan System
  * @author Jeremy Choron
  */
-class Recipe extends sqlRow
+class Ingredient extends sqlRow
 {
 	// Instanciation and construction of the object with data from the database
 	public function __construct($id)
