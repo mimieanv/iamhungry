@@ -7,7 +7,6 @@
  */
 class Recipe extends sqlRow
 {
-	
 	// Instanciation and construction of the object with data from the database
 	public function __construct($id)
 	{
@@ -16,21 +15,22 @@ class Recipe extends sqlRow
 	
 	public function getFullContentInArray()
 	{
-	//TODO
 		return Array(
 						'id'				=> $this->id,
 						'name'				=> $this->name,
-						'type'				=> $this->getType(),					
+						'description'		=> $this->description,
+						'serving_unit'		=> $this->serving_unit,
+						'category'			=> $this->getCategory()					
 					);
 	}
 	
     /**
-     * Function getType
-     * Return the type of the ingredient
+     * Function getCategory
+     * Return the category of the ingredient
      */
     public function getCategory()
     {
-        //return new Category($this->???);
+        return new Category($this->id_category);
     }
 	
 	

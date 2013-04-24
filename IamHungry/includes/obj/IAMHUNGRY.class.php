@@ -133,7 +133,7 @@ class IAMHUNGRY
  * Function getMainProductTypes
  * Enter description here ...
  */
-	public function getMainProductTypes()
+	/*public function getMainProductTypes()
 	{
 		$q = DB::getInstance()->query("SELECT * FROM product_type WHERE id_type_from = 0 ORDER BY name ASC ;");
 		$i = 0;
@@ -141,7 +141,7 @@ class IAMHUNGRY
 			$productTypesList[] = new ProductType($productType->id);
 			
 		return $productTypesList;		
-	}
+	}*/
 	
     /**
      * Function getLists
@@ -149,7 +149,7 @@ class IAMHUNGRY
      * @param <int> $max
      * @param <int> state: 0->list, 1->cart, 2->order 
      */
-	public function getProductLists($state = 1, $max = 0)
+	/*public function getProductLists($state = 1, $max = 0)
 	{
 		$lists = Array();
 		$maxReq = ($max) ? 'LIMIT 0, {$max}' : '';
@@ -160,6 +160,19 @@ class IAMHUNGRY
 			$lists[]	= $l;
 		}
 		return $lists;
+	}*/
+	
+	public function getAllIngredients($max = 0)
+	{
+		$lists = Array();
+		$maxReq = ($max) ? 'LIMIT 0, {$max}' : '';
+		$q = DB::getInstance()->query("SELECT id FROM ingredient ORDER BY name {$maxReq} ;");
+		$j = 0;
+		while($ingredient = $q->fetch_object()) {
+			$i    			= new Ingredient($ingredient->id_product_list);
+			$ingredients[]	= $i;
+		}
+		return $ingredients;
 	}
 
 /*********************

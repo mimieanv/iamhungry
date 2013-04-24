@@ -16,11 +16,14 @@ class Recipe extends sqlRow
 	
 	public function getFullContentInArray()
 	{
-	//TODO
 		return Array(
 						'id'				=> $this->id,
 						'name'				=> $this->name,
-						'type'				=> $this->getType(),					
+						'description'		=> $this->description,
+						'instructions'		=> $this->instructions,
+						'nb_servings'		=> $this->nb_servings,
+						'preparation_time'	=> $this->preparation_time,
+						'category'			=> $this->getCategory()					
 					);
 	}
 	
