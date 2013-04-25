@@ -95,7 +95,6 @@ class User extends sqlRow {
 		}
 		
 		return $ingredients;
-
 	}
 	
 	public function hasIngredientInhand($_id)
@@ -115,10 +114,12 @@ class User extends sqlRow {
 		
 		if($this->hasIngredientInhand($_idIngredient))
 			//if user already have this ingredient, UPDATE
-			DB::getInstance()->real_query("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
-		else	
+			//DB::getInstance()->real_query("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
+			echo("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
+		else
 			//if not, INSERT
-			DB::getInstance()->real_query("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
+			//DB::getInstance()->real_query("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
+			echo("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
 	}
 
 	public function isRecipePlanned($_recipeId, $_mealId)
@@ -126,6 +127,100 @@ class User extends sqlRow {
 		return ((sql_result("select count(*) from ass_recipe_meal where id_user={$this->id} and id_recipe={$_recipeId} and id_meal={$_mealId}") == 1) ? true : false);
 	}
 	
+	public function getWeekPlanning()
+	{
+		$planning = Array();
+		
+		for($d=1; $d<=7; $d++) {			
+    		$day = IAMHUNGRY::getInstance()->getDay($d);
+    		$meals = IAMHUNGRY::getInstance()->getMeals($d);
+   
+    //$jour 			= Array();
+	//$jour['day']	= $day;
+    		
+    		foreach($meals as $meal) {
+   				$mealPlanned = $this->getRecipesPlanned($meal->id);
+   	//echo '-------';
+   	//var_dump($mealPlanned);
+				if($mealPlanned == null)
+					$mealPlanned = "Diet!";
+				
+				$plann = Array();
+				$plann['day']		= $day;
+				$plann['meal']		= $meal->mealOfDay;
+				$plann['recipes']	= $mealPlanned;
+				
+				$planning[] = $plann;
+				
+	//$planning[]['day']		= $day;
+	//$planning[]['meal']		= $meal->mealOfDay;
+	//$planning[]['recipes']	= $mealPlanned;
+	//$m++;
+    		}
+    	}
+    	
+    //var_dump($planning);
+    	return $planning;
+    }
+    
+    public function getRecipesPlanned($_idMeal)
+    {
+		$recipes = Array();
+    	$q = DB::getInstance()->query("SELECT id_recipe FROM ass_recipe_meal WHERE id_meal={$_idMeal} AND id_user={$this->id} ;");
+
+		while($r = $q->fetch_object())
+			$recipes[] = new Recipe($r->id_recipe);	
+
+		return $recipes;
+    }
+    
+/******* GROCERY LIST ********/
+    
+public function makeGroceryList()
+{
+	
+}
+
+// OK
+public function getSumPlannedMealsOfWeek()
+{
+	$recipes = Array();
+    $q = DB::getInstance()->query("SELECT id_recipe, count(id_recipe) as quantity FROM ass_recipe_meal WHERE id_user={$this->id} GROUP BY id_recipe ;");
+
+	while($r = $q->fetch_object()) {
+		
+		$meals 					= Array();
+		$recipe 				= new Recipe($r->id_recipe);
+		$meals['ingredients']	= $recipe->getIngredients();
+		$meals['quantity']		= $r->quantity;
+		$recipes[]				= $meals;
+	}
+	
+	return $recipes;
+}
+
+// disgusting :s
+public function getSumNeededIngredientsWeek()
+{
+	$recipes = $this->getSumPlannedMealsOfWeek();
+	
+//	var_dump($recipes);
+	foreach($recipes as $recipe) {
+//		var_dump($recipe);
+		foreach($recipe as $ingredient) {
+//			var_dump($ingredient); echo '<br />ppp<br />';
+			foreach($ingredient as $prout) {
+//				var_dump($prout);
+				$sum 				= Array();
+				$sum['id']			= $prout['id'];
+				$sum['quantity']	= $prout['quantity'] * 1;
+			}
+		}
+	}
+}
+
+    
+
 /******* OTHER FUNCTIONS ********/
 
 	/**

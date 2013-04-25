@@ -24,7 +24,7 @@ class AllRecipes implements IModule
     	
 		$recipes = IAMHUNGRY::getInstance()->getAllRecipes();
 		foreach($recipes as $recipe)
-			echo "<a href=\"index.php?page=recipe&id_recipe={$recipe->id}\">{$recipe->name}</a>";
+			echo "<a href=\"index.php?page=recipe&id_recipe={$recipe->id}\">{$recipe->name}</a><br />";
     }
 
 }

@@ -34,14 +34,15 @@ class Recipe extends sqlRow
 	 */
 	public function getIngredients()
 	{
-		$q_Ingredients = DB::getInstance()->query("SELECT id_ingredient, quantity FROM list WHERE id_entity={$this->id} and list_type='recipe' ;");
+		$ingredientsList = Array();
+		$q_Ingredients = DB::getInstance()->query("SELECT id_ingredient, quantity FROM ass_recipe_ingredient WHERE id_recipe={$this->id} ;");
 
 		while($qId = $q_Ingredients->fetch_object()) {
 			$ing = new Ingredient($qId->id_ingredient);
-			$ingredientsList[] = array('name' => $ing->name, 'quantity' => $qId->quantity, 'serving_unit' => $ing->serving_unit);
+			$ingredientsList[] = array('id' => $ing->id, 'name' => $ing->name, 'quantity' => $qId->quantity, 'serving_unit' => $ing->serving_unit);
 		}
 			
-		return ($ingredientsList != null) ? $ingredientsList : null;
+		return (($ingredientsList != null) ? $ingredientsList : null);
 	}
 	
     public function getCategory()

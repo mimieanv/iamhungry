@@ -21,15 +21,16 @@ class Header implements IModule
 
     function display()
     {
-    	echo "******* WELCOME TO I.AM.HUNGRY! *******<br /><br /><br />";
+    	echo "*********** WELCOME TO I.AM.HUNGRY! ***********<br /><br /><br />";
     	echo "Welcome back {$this->userName}!<br />";
     	echo "<a href=\"index.php\" >Home</a>
     		  #  <a href=\"index.php?page=registration\" >Register</a>
     		  #  Login
     		  #  <a href=\"index.php?page=recipes_list\">Recipes</a>
     		  #  <a href=\"index.php?page=fridge\">My fridge</a>
+    		  #  <a href=\"index.php?page=planning\">My planning</a>
     		  #  <a href=\"index.php?page=grocery\">My shopping list</a>
-    		<br /><br /><br />
+    		<br /><br /><br /><br />
     	";
     }
 

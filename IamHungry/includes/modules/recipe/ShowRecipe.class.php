@@ -24,7 +24,23 @@ class ShowRecipe implements IModule
     //TODO design?
     function display()
     {
+    	
+     	if(isset($_REQUEST['action'])) {
+    		switch($_REQUEST['action']) {
+
+				case 'plann' :
+					var_dump($_POST);
+					foreach($_POST as $id_ing => $qty)
+						if(is_numeric($qty) && $qty > 0)
+							IAMHUNGRY::getInstance()->user->addIngredientInhand($id_ing, $qty);
+							
+				break;
+    		}
+        }
+        
+        
     	$rec = $this->recipe->getFullContentInArray();
+//    	var_dump($rec);
     	echo 'Recipe: '. $rec['name'] .'<br /><br />'. $rec['description'] .'<br /><br />Ingredients:<br />';
     	
    		foreach($rec['ingredients'] as $ing) {
