@@ -19,9 +19,7 @@ class ShowRecipe implements IModule
     }
 
     //TODO add a meal in the plan
-    //TODO show meal plan of the week
     //TODO show grocery list
-    //TODO design?
     function display()
     {
     	
@@ -29,11 +27,10 @@ class ShowRecipe implements IModule
     		switch($_REQUEST['action']) {
 
 				case 'plann' :
-					var_dump($_POST);
-					foreach($_POST as $id_ing => $qty)
-						if(is_numeric($qty) && $qty > 0)
-							IAMHUNGRY::getInstance()->user->addIngredientInhand($id_ing, $qty);
-							
+					foreach($_POST as $meal)
+						IAMHUNGRY::getInstance()->user->planRecipe($this->recipe->id, $meal);
+				
+					IAMHUNGRY::getInstance()->user->makeGroceryList();
 				break;
     		}
         }
@@ -60,9 +57,9 @@ class ShowRecipe implements IModule
     			$meals = IAMHUNGRY::getInstance()->getMeals($d);
     			foreach($meals as $meal) {
   	 				if(IAMHUNGRY::getInstance()->user->isRecipePlanned($this->recipe->id, $meal->id))
-    					echo "<input type=\"checkbox\" name=\"meal\" value=\"{$meal->id}\" checked >{$meal->mealOfDay}<br>";
+    					echo "<input type=\"checkbox\" name=\"{$meal->id}\" value=\"{$meal->id}\" checked >{$meal->mealOfDay}<br>";
     				else
-     					echo "<input type=\"checkbox\" name=\"meal\" value=\"{$meal->id}\">{$meal->mealOfDay}<br>";
+     					echo "<input type=\"checkbox\" name=\"{$meal->id}\" value=\"{$meal->id}\">{$meal->mealOfDay}<br>";
     			}
     			
     			echo '<br />';

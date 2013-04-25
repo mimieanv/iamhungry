@@ -110,16 +110,14 @@ class User extends sqlRow {
 	
 	public function addIngredientInhand($_idIngredient, $_quantity)
 	{
-		//TODO check id_ingredient exist
+		//TODO check id_ingredient exists
 		
 		if($this->hasIngredientInhand($_idIngredient))
 			//if user already have this ingredient, UPDATE
-			//DB::getInstance()->real_query("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
-			echo("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
+			DB::getInstance()->real_query("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
 		else
 			//if not, INSERT
-			//DB::getInstance()->real_query("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
-			echo("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
+			DB::getInstance()->real_query("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
 	}
 
 	public function isRecipePlanned($_recipeId, $_mealId)
@@ -174,12 +172,30 @@ class User extends sqlRow {
 		return $recipes;
     }
     
+	public function planRecipe($_idRecipe, $_meal)
+	{
+		//TODO check id_recipe (and meal) exist
+		
+		if(!($this->isRecipePlanned($_idRecipe, $_meal)))
+			//if user already have this meal planned, UPDATE
+//			DB::getInstance()->real_query("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
+//		else
+			//if not, INSERT
+			DB::getInstance()->real_query("INSERT INTO ass_recipe_meal VALUES ({$this->id}, {$_idRecipe}, {$_meal}) ;");
+	}
+	
 /******* GROCERY LIST ********/
-    
+
+/**
+ * Tested, ok!
+ */
 public function makeGroceryList()
 {
-	
+	$this->getSumNeededIngredientsWeek();
+	$this->differenceNeedHave();
 }
+
+
 
 // OK
 public function getSumPlannedMealsOfWeek()
@@ -199,27 +215,96 @@ public function getSumPlannedMealsOfWeek()
 	return $recipes;
 }
 
-// disgusting :s
+/**
+ * Tested, ok!
+ */
 public function getSumNeededIngredientsWeek()
 {
-	$recipes = $this->getSumPlannedMealsOfWeek();
+	// We do a new grocery list each time the user add ingredients or plan a meal
+	// (disgusting way but... I lack time and all my code is disgusting! :s)
+	DB::getInstance()->real_query("DELETE FROM grocery_list WHERE id_user=\"{$this->id}\" ");
+	
+	$recipes = Array();
+    $q = DB::getInstance()->query("SELECT id_recipe, count(id_recipe) as quantity FROM ass_recipe_meal WHERE id_user={$this->id} GROUP BY id_recipe ;");
+
+	while($r = $q->fetch_object()) {
+//		var_dump($r);
+		
+		$ingredients	= Array();
+		$recipe 		= new Recipe($r->id_recipe);
+//		var_dump($recipe);
+		
+		foreach($recipe->getIngredients() as $ing) {
+//			var_dump($ing);
+			$ingredients['id']				= $ing['id'];
+			$ingredients['name']			= $ing['name'];
+			$ingredients['quantity']		= ($ing['quantity'] * $r->quantity);
+			$ingredients['serving_unit']	= $ing['serving_unit'];
+//			var_dump($ingredients);
+			
+			if(sql_result("SELECT count(*) FROM grocery_list WHERE id_user=\"{$this->id}\" and id_ingredient=\"{$ing['id']}\" ;") == 0) {
+				DB::getInstance()->real_query("INSERT INTO grocery_list(id_user, id_ingredient, quantity) VALUES (\"{$this->id}\", \"{$ing['id']}\", \"{$ingredients['quantity']}\") ;");
+			} else {
+				DB::getInstance()->real_query("UPDATE grocery_list SET quantity = quantity + \"{$ingredients['quantity']}\" WHERE id_user=\"{$this->id}\" AND id_ingredient=\"{$ing['id']}\" ;");
+			}
+//			echo '<br />TADAA<br />!';
+		}
+		
+		//$ingredientsNeeded[] = $ingredients;
+	}
 	
 //	var_dump($recipes);
-	foreach($recipes as $recipe) {
-//		var_dump($recipe);
-		foreach($recipe as $ingredient) {
-//			var_dump($ingredient); echo '<br />ppp<br />';
-			foreach($ingredient as $prout) {
-//				var_dump($prout);
-				$sum 				= Array();
-				$sum['id']			= $prout['id'];
-				$sum['quantity']	= $prout['quantity'] * 1;
-			}
-		}
-	}
+	//return $recipes;
 }
 
-    
+/**
+ * Tested, ok!
+ */
+public function differenceNeedHave()
+{
+	/*
+	 * For each ingredient of grocery_list table, we check if the user has in his fridge.
+	 * If yes, if more than needed we delete it.
+	 * If yes, but less than needed we substract it.
+	 * If no, Dummy
+	 */	
+	
+	$ingredients = Array();
+    	$q = DB::getInstance()->query("SELECT * FROM grocery_list WHERE id_user={$this->id} ;");
+
+		while($ingNeeded = $q->fetch_object()) {
+//			var_dump($ing);
+			/* We check if the user has this ingredient in his fridge */
+			$qtyHave = sql_result("SELECT quantity FROM user_inhand WHERE id_user=\"{$this->id}\" and id_ingredient=\"{$ingNeeded->id_ingredient}\" ;");
+			if($qtyHave != -1) {
+				if($qtyHave >= $ingNeeded->quantity) {
+					// If we have more than that we need we delete the row in grocery_list
+					DB::getInstance()->real_query("DELETE FROM grocery_list WHERE id_user=\"{$this->id}\" AND id_ingredient=\"{$ingNeeded->id_ingredient}\" ;");
+				} else {
+					// If we have less than that we need: UPDATE with 'needed' - 'have'
+					DB::getInstance()->real_query("UPDATE grocery_list SET quantity = quantity - \"{$qtyHave}\" WHERE id_user=\"{$this->id}\" AND id_ingredient=\"{$ingNeeded->id_ingredient}\" ;");
+				}
+			}	
+		}	
+}
+
+public function getGroceryList()
+{
+	$ingredients = Array();
+    $q = DB::getInstance()->query("SELECT * FROM grocery_list WHERE id_user={$this->id} ;");
+
+	while($ing = $q->fetch_object()) {
+//		var_dump($ing);
+		$ingredient['ing']		= new Ingredient($ing->id_ingredient);
+		$ingredient['quantity']	= $ing->quantity;
+		
+		$ingredients[] = $ingredient;
+		//$recipes[] = new Recipe($r->id_recipe);
+	}
+//	var_dump($ingredients);
+
+	return $ingredients;	
+}
 
 /******* OTHER FUNCTIONS ********/
 

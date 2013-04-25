@@ -23,7 +23,7 @@ class Recipe extends sqlRow
 						'instructions'		=> $this->instructions,
 						'nb_servings'		=> $this->nb_servings,
 						'preparation_time'	=> $this->preparation_time,
-						'category'			=> 1, //$this->getCategory(),
+						'category'			=> 1, //TODO $this->getCategory(),
 						'ingredients'		=> $this->getIngredients()					
 					);
 	}
@@ -45,29 +45,12 @@ class Recipe extends sqlRow
 		return (($ingredientsList != null) ? $ingredientsList : null);
 	}
 	
+	//TODO check
     public function getCategory()
     {
     	return sql_query("select name from recipe-ingredient_category where id= {$this->id} ;");
     }
 	
-	
-	/**
-	 * Function getPictures
-	 * Get pictures about the product
-	 */
-	public function getPictures($max = 0)
-	{
-		$picturesList = Array();
-		$maxReq = ($max) ? "LIMIT 0, {$max}" : '';
-		$q_Pictures = DB::getInstance()->query("SELECT id_picture FROM picture WHERE id_entity={$this->id} and type='recipe' {$maxReq};");
-		while($qId = $q_Pictures->fetch_object())
-			$picturesList[] = new Picture($qId->id_picture);
-        
-		if(empty($picturesList))
-			$picturesList[] = new Picture('no_picture.jpg');
-		
-		return $picturesList;
-	}
 	
 	/**
 	 * Function getUrl

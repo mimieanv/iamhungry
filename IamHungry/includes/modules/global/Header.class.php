@@ -26,7 +26,7 @@ class Header implements IModule
     	echo "<a href=\"index.php\" >Home</a>
     		  #  <a href=\"index.php?page=registration\" >Register</a>
     		  #  Login
-    		  #  <a href=\"index.php?page=recipes_list\">Recipes</a>
+    		  #  <a href=\"index.php?page=recipes_all\">Recipes</a>
     		  #  <a href=\"index.php?page=fridge\">My fridge</a>
     		  #  <a href=\"index.php?page=planning\">My planning</a>
     		  #  <a href=\"index.php?page=grocery\">My shopping list</a>

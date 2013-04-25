@@ -26,7 +26,8 @@ class SetInhand implements IModule
 					foreach($_POST as $id_ing => $qty)
 						if(is_numeric($qty) && $qty > 0)
 							IAMHUNGRY::getInstance()->user->addIngredientInhand($id_ing, $qty);
-							
+					
+					IAMHUNGRY::getInstance()->user->makeGroceryList();
 				break;
     		}
         }
