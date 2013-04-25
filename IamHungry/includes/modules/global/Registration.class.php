@@ -7,11 +7,11 @@
 
 class Registration implements IModule
 {
-	/*private $error = '';
-	private $state = '';*/
+	/*private $error = '';*/
+	private $state = 'try_register';
 
     function __construct() {
-    	$this->state = '';
+    	$this->state = 'try_register';
     	$this->error = '';
     	
     	if(isset($_REQUEST['action'])) {
@@ -24,7 +24,7 @@ class Registration implements IModule
 
 				# CREATION DE COMPTE
 				case 'register' :
-echo 'creating new account... <br />';
+//echo 'creating new account... <br />';
 					// Verification des donnees retournees par l'user
 					if(strlen($_REQUEST['register_password']) < 8)
 						$this->error = 'Password must be at least constitued by 8 characters.';
@@ -54,14 +54,10 @@ echo 'creating new account... <br />';
 
     public function display()
     {
-		switch($this->state) {
-			
+		switch($this->state) {		
 			case 'try_register' :
 ?>	
-
 				<form id="formElem" name="formElem" action="index.php?page=registration&action=register" method="post" >
-					<legend>Account</legend>
-					
 					<label for="email">Email</label>
 					<input id="email" name="register_mail" placeholder="iam@hung.ry" type="email" AUTOCOMPLETE=OFF />
 					<br />
@@ -70,7 +66,7 @@ echo 'creating new account... <br />';
 					<br />
 					<label for="last_name">Nom</label>
 					<input id="last_name" name="register_name" type="text" AUTOCOMPLETE=OFF />
-					
+					<br/>
 					<button id="registerButton" type="submit">Create my account and eat soon!</button>
 				</form>
 
@@ -94,17 +90,18 @@ echo 'creating new account... <br />';
 		$name		= DB::getInstance()->real_escape_string($register_data['register_name']);
 		$name		= ucfirst(strtolower($name));
 		
-        $password	= hash('sha512', ($firstName . 'lasagnes!' . $register_data['register_password']));
+        $password	= hash('sha512', ($name . 'lasagnes!' . $register_data['register_password']));
 
-		$id_user = IAMHUNGRY::getInstance()->createUser($email, $password, $name);
-		echo "I heard that you're hungry? You're at the good place, welcome hungry man!";
+		$id_user = IAMHUNGRY::getInstance()->createUser($email, $name, $password);
+		echo "I heard that you're hungry? You're at the good place! Welcome, hungry man!";
 		$this->login(new User($id_user));
     }
 
     public function login($user) {
     	$_SESSION['id_user']			= $user->id;
 		IAMHUNGRY::getInstance()->user	= $user;
-		echo "Welcome back guy!";
+		echo "<br />Welcome back guy!";
+		
     }
 
 }

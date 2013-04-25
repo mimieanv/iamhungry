@@ -44,7 +44,7 @@ class IAMHUNGRY
 											VALUES(
 												'{$email}',
 												'{$name}',
-												'{$password}',
+												'{$password}'
 											); ");
 
 		return $id_user = DB::getInstance()->insert_id;	// l'id du dernier insert dans la db
@@ -71,96 +71,10 @@ class IAMHUNGRY
 			$recipes[] = new Recipe($qId->id);
 		return (isset($recipes)) ? $recipes : null;	
 	}
-
 	
-/***********************************************************************
- * LISTS FUNCTIONS (USERS LISTS, PRODUCTS LISTS, PRODUCT TYPES LISTS...)
- ***********************************************************************/
-	
-/*
- * PRODUCTS
- */
-	/**
-	 * Function getProductsAvailables
-	 * Get lists which contains products
-	 * @param <int> $max
-	 */
-	public function getProductsAvailables($max = 0)
-	{
-		$productsAvailables = Array();
-		$maxReq = ($max) ? "LIMIT 0, {$max}" : '';
-		$q_Products = DB::getInstance()->query("SELECT * FROM product WHERE online=1 ORDER BY id DESC {$maxReq} ;");
-		while($qId = $q_Products->fetch_object())
-			$productsAvailables[] = new Product($qId->id);
-		return $productsAvailables;		
+	public function getCountIngredients() {
+		return sql_result("select count(*) from ingredient ;");
 	}
-	
-/*
- * PRODUCTS TYPES
- */
-	/**
-	 * Function getAllProductsTypes
-	 * Get all products types (order like a tree)
-	 * @param <int> $from id of the parent
-	 */
-	//TODO Marche enfin ! :) -_-
-	public function getProductTypes($from = null)
-	{
-		$productTypesList = Array();
-		$fromReq = ($from) ? $from : '0';
-		$q = DB::getInstance()->query("SELECT * FROM product_type WHERE id_type_from = '{$fromReq}' ORDER BY name ASC ;");
-		$i = 0;
-		while($productType = $q->fetch_object()) {
-			$i++;
-			$type = new ProductType($productType->id);
-			if(!($type->hasSon())) {
-				$productTypesList[] = Array(
-					'id_type'		=> $type->id,
-					'name_type'		=> $type->name,
-				);
-			} else {
-				$productTypesList[] = Array(
-					'id_type'		=> $type->id,
-					'name_type'		=> $type->name,
-					'son'			=> $this->getProductTypes($type->id),
-				);
-			}
-		}
-		return $productTypesList;
-	}
-	
-/**
- * Function getMainProductTypes
- * Enter description here ...
- */
-	/*public function getMainProductTypes()
-	{
-		$q = DB::getInstance()->query("SELECT * FROM product_type WHERE id_type_from = 0 ORDER BY name ASC ;");
-		$i = 0;
-		while($productType = $q->fetch_object())
-			$productTypesList[] = new ProductType($productType->id);
-			
-		return $productTypesList;		
-	}*/
-	
-    /**
-     * Function getLists
-     * Get lists (cart, favorites lists and order)
-     * @param <int> $max
-     * @param <int> state: 0->list, 1->cart, 2->order 
-     */
-	/*public function getProductLists($state = 1, $max = 0)
-	{
-		$lists = Array();
-		$maxReq = ($max) ? 'LIMIT 0, {$max}' : '';
-		$q = DB::getInstance()->query("SELECT id_product_list FROM user_product_list WHERE state={$state} ORDER BY date_creation DESC ;");
-		$i = 0;
-		while($list = $q->fetch_object()) {
-			$l    		= new ProductList($list->id_product_list);
-			$lists[]	= $l;
-		}
-		return $lists;
-	}*/
 	
 	public function getAllIngredients($max = 0)
 	{
@@ -169,10 +83,42 @@ class IAMHUNGRY
 		$q = DB::getInstance()->query("SELECT id FROM ingredient ORDER BY name {$maxReq} ;");
 		$j = 0;
 		while($ingredient = $q->fetch_object()) {
-			$i    			= new Ingredient($ingredient->id);
-			$ingredients[]	= $i;
+			$ing			= new Ingredient($ingredient->id);
+			$ingredients[]	= array('ing' => $ing, 'quantity' => '0');
+			
+			//$ingredients[]	= $ing;
 		}
 		return $ingredients;
+	}
+	
+	public function getAllRecipes($max = 0)
+	{
+		$lists = Array();
+		$maxReq = ($max) ? 'LIMIT 0, {$max}' : '';
+		$q = DB::getInstance()->query("SELECT id FROM recipe ORDER BY name {$maxReq} ;");
+		$j = 0;
+		while($recipe = $q->fetch_object()) {
+			$i    		= new Recipe($recipe->id);
+			$recipes[]	= $i;
+		}
+		return $recipes;
+	}
+	
+	public function getDay($_idDay)
+	{
+		$d = sql_query("select dayOfWeek from week_meals where dayOfWeek_id =\"{$_idDay}\" limit 0,1 ;");
+		return $d[0]['dayOfWeek'];
+	}
+	
+	public function getMeals($_idDay)
+	{
+		$meals = Array();
+		$q = DB::getInstance()->query("SELECT * FROM week_meals WHERE dayOfWeek_id = \"{$_idDay}\"ORDER BY mealOfDay_id ;");
+		$j = 0;
+		while($meal = $q->fetch_object()) {
+			$meals[] = $meal;
+		}
+		return $meals;		
 	}
 
 /*********************
@@ -218,6 +164,8 @@ class IAMHUNGRY
 	private function getModuleDirectories()
 	{
 		return Array(
+					'global',
+					'home',
 					'recipe',
 					'test'
 				);

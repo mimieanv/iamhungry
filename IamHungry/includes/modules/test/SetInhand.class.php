@@ -15,28 +15,32 @@ class SetInhand implements IModule
     
     function preProcess($construct)
     {
-    	//
-    }
+	}
 
     function display()
     {
-    	$ingredients = IAMHUNGRY::getInstance()->getAllIngredients();
-		echo "Add some news ingredients which are in your fridge:
-			<form name=\"choice\" action=\"index.php?page=inhand&action=\" method=\"POST\">";
-		for ($i = 1; $i <= 10; $i++) {
-?>
-			<select>
+        if(isset($_REQUEST['action'])) {
+    		switch($_REQUEST['action']) {
 
-<?php
-			echo "<option value=\"0\">nothing</option>" ;
-			foreach($ingredients as $ingredient) {
-				echo "<option value=\"{$ingredient->id}\">{$ingredient->name} (in {$ingredient->serving_unit})</option>" ;
+				case 'addIngredients' :
+					foreach($_POST as $id_ing => $qty)
+						if(is_numeric($qty) && $qty > 0)
+							IAMHUNGRY::getInstance()->user->addIngredientInhand($id_ing, $qty);
+							
+				break;
+    		}
+        }
+
+   		$allIngredients = IAMHUNGRY::getInstance()->user->getAllIngredientsQuantityInhand();
+		echo "What's in your fridge?
+			<form name=\"choice\" action=\"index.php?page=fridge&action=addIngredients\" method=\"POST\">";
+
+    		foreach($allIngredients as $ingredient) {
+				echo "{$ingredient['ing']->name}: <input type=\"text\" name=\"{$ingredient['ing']->id}\" value=\"{$ingredient['quantity']}\"> {$ingredient['ing']->serving_unit}<br />" ;
 			}
-			
-			echo "<input type=\"text\" name=\"mail\" size=\"25\"><br />";
-			echo "</select>";
-		}
-		echo "</form>";
+		
+   		echo '<button type="submit">Refill!</button>
+		</form>';
 
     }
 

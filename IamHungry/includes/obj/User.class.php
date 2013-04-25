@@ -68,15 +68,64 @@ class User extends sqlRow {
 		return ($id != -1) ? new IngredientsList($id) : null;
 	}
 
-	/**
-	 * Function getProductsInCartCount
-	 * @return number of products put in their shopping cart
-	 */
-	public function getIngredientsInHandCount()
+
+	public function getIngredientsInhand()
 	{
-		return sql_result("SELECT COUNT(id_list) AS count_products FROM `product_list` WHERE id_list = (SELECT id_product_list FROM  `user_product_list` WHERE id_user='{$this->id}' AND state=1");
+		$q_Ingredients = DB::getInstance()->query("SELECT id_ingredient, quantity FROM user_inhand WHERE id_user={$this->id} ;");
+
+		while($qId = $q_Ingredients->fetch_object()) {
+			$ing = new Ingredient($qId->id_ingredient);
+			$ingredientsList[] = array('ing' => $ing, 'quantity' => $qId->quantity);
+		}
+				
+		return ($ingredientsList != null) ? $ingredientsList : null;
+	}
+	
+	// Nice
+	public function getAllIngredientsQuantityInhand()
+	{
+		$lists = Array();
+		$q = DB::getInstance()->query("SELECT id FROM ingredient ORDER BY name ;");
+		$j = 0;
+		while($ingredient = $q->fetch_object()) {
+			$ing	= new Ingredient($ingredient->id);
+			$qty	= $this->getIngredientQuantity($ing->id);
+				
+			$ingredients[]	= array('ing' => $ing, 'quantity' => $qty);			
+		}
+		
+		return $ingredients;
+
+	}
+	
+	public function hasIngredientInhand($_id)
+	{
+		return ((sql_result("select count(*) from user_inhand where id_user={$this->id} and id_ingredient={$_id}") == 1) ? true : false);
+	}
+	
+	public function getIngredientQuantity($id)
+	{
+		$quantity = sql_result("select quantity from user_inhand where id_user={$this->id} and id_ingredient={$id}");		
+		return ($quantity > 0 ) ? $quantity : 0;
+	}
+	
+	public function addIngredientInhand($_idIngredient, $_quantity)
+	{
+		//TODO check id_ingredient exist
+		
+		if($this->hasIngredientInhand($_idIngredient))
+			//if user already have this ingredient, UPDATE
+			DB::getInstance()->real_query("UPDATE user_inhand SET quantity={$_quantity} WHERE id_user={$this->id} AND id_ingredient={$_idIngredient} ;");
+		else	
+			//if not, INSERT
+			DB::getInstance()->real_query("INSERT INTO user_inhand VALUES ({$this->id}, {$_idIngredient}, {$_quantity}) ;");
 	}
 
+	public function isRecipePlanned($_recipeId, $_mealId)
+	{
+		return ((sql_result("select count(*) from ass_recipe_meal where id_user={$this->id} and id_recipe={$_recipeId} and id_meal={$_mealId}") == 1) ? true : false);
+	}
+	
 /******* OTHER FUNCTIONS ********/
 
 	/**

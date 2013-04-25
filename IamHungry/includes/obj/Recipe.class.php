@@ -38,7 +38,7 @@ class Recipe extends sqlRow
 
 		while($qId = $q_Ingredients->fetch_object()) {
 			$ing = new Ingredient($qId->id_ingredient);
-			$ingredientsList[] = array($ing->name, $qId->quantity);
+			$ingredientsList[] = array('name' => $ing->name, 'quantity' => $qId->quantity, 'serving_unit' => $ing->serving_unit);
 		}
 			
 		return ($ingredientsList != null) ? $ingredientsList : null;
